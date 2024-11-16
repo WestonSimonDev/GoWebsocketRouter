@@ -16,7 +16,7 @@ func asyncEndpointRunner(endpoint func(payload []byte, companyID int) ([]byte, e
 	errorChan <- err
 }
 
-func HandleRequest(path string, payload []byte, router *RouteRegistration) ([]byte, error) {
+func (router *RouteRegistration) HandleRequest(path string, payload []byte) ([]byte, error) {
 
 	fmt.Println("Running router")
 
@@ -42,7 +42,7 @@ func HandleRequest(path string, payload []byte, router *RouteRegistration) ([]by
 		subRouter, ok := router.SubRouters[parsedPath[0]]
 		if ok {
 			jsonBytes, _ := json.Marshal("abcd")
-			return HandleRequest(parsedPath[1], jsonBytes, subRouter)
+			return subRouter.HandleRequest(parsedPath[1], jsonBytes)
 		}
 
 	}

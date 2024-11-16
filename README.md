@@ -12,6 +12,7 @@ tlRtr, err := CreateToplevelRouter()
 ``
 subRouter, err := router.CreateSubRouter("path2")
 ``
+
 This creates a router at the pat ```/{router path}/path2```.
 
 ## Step 3 Create endpoint
@@ -26,7 +27,7 @@ return payload, nil
 })
 ```
 
-## Accept Request
+## Step 4 Accept Request
 You can start handling request at any router level but only the top level router has access to all sub routers.
 ```
 response, err := tlRtr.HandleRequest("one/two/three", {Some json payload})

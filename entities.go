@@ -1,7 +1,5 @@
 package WebsocketRouter
 
-var registeredRoutes = make(map[string]RouteRegistration)
-
 type RouteRegistration struct {
 	SubRouters map[string]*RouteRegistration
 	EndPoints  map[string]func(payload []byte, companyID int) ([]byte, error)

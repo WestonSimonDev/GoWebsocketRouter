@@ -11,7 +11,10 @@ func CreateToplevelRouter() (*RouteRegistration, error) {
 	var newRouter = &RouteRegistration{make(map[string]*RouteRegistration), make(map[string]func(payload []byte) ([]byte, error))}
 
 	newRouter.CreateEndpoint("heartBeat", func(payload []byte) ([]byte, error) {
-		return []byte(""), nil
+		var pathNotFoundResponse = make(map[string]string)
+		pathNotFoundResponse["error"] = "successful"
+		response, _ := json.Marshal(pathNotFoundResponse)
+		return response, nil
 	})
 
 	return newRouter, nil

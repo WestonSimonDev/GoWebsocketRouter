@@ -33,8 +33,6 @@ func asyncEndpointRunner(endpoint func(payload []byte) ([]byte, error), payload 
 
 func (router *RouteRegistration) HandleRequest(request Request) ([]byte, error) {
 
-	fmt.Println("Running router")
-
 	parsedPath := parsePath(request.Path)
 
 	request.Path = parsedPath[len(parsedPath)-1]
@@ -42,7 +40,6 @@ func (router *RouteRegistration) HandleRequest(request Request) ([]byte, error) 
 	if len(parsedPath) == 1 {
 		endpoint, ok := router.EndPoints[parsedPath[0]]
 		if ok {
-			fmt.Println("hi")
 
 			responseChan := make(chan []byte)
 			errChan := make(chan error)

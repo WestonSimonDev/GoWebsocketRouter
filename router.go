@@ -3,14 +3,15 @@ package WebsocketRouter
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 )
 
 func CreateToplevelRouter() (*RouteRegistration, error) {
 
-	var newRouter = &RouteRegistration{make(map[string]*RouteRegistration), make(map[string]func(payload []byte) ([]byte, error))}
+	var newRouter = &RouteRegistration{make(map[string]*RouteRegistration), make(map[string]func(payload []byte, httpRequest *http.Request) ([]byte, error))}
 
-	newRouter.CreateEndpoint("heartBeat", func(payload []byte) ([]byte, error) {
+	newRouter.CreateEndpoint("heartBeat", func(payload []byte, httpRequest *http.Request) ([]byte, error) {
 		var pathNotFoundResponse = make(map[string]string)
 		pathNotFoundResponse["error"] = "successful"
 		response, _ := json.Marshal(pathNotFoundResponse)
@@ -25,13 +26,13 @@ func parsePath(path string) []string {
 	return strings.SplitN(path, "/", 2)
 }
 
-func asyncEndpointRunner(endpoint func(payload []byte) ([]byte, error), payload []byte, responseChan chan []byte, errorChan chan error) {
-	response, err := endpoint(payload)
+func asyncEndpointRunner(endpoint func(payload []byte, httpRequest *http.Request) ([]byte, error), payload []byte, responseChan chan []byte, errorChan chan error, httpRequest *http.Request) {
+	response, err := endpoint(payload, httpRequest)
 	responseChan <- response
 	errorChan <- err
 }
 
-func (router *RouteRegistration) HandleRequest(request Request) ([]byte, error) {
+func (router *RouteRegistration) HandleRequest(request Request, httpRequest *http.Request) ([]byte, error) {
 
 	parsedPath := parsePath(request.Path)
 
@@ -44,7 +45,7 @@ func (router *RouteRegistration) HandleRequest(request Request) ([]byte, error) 
 			responseChan := make(chan []byte)
 			errChan := make(chan error)
 
-			go asyncEndpointRunner(endpoint, request.Payload, responseChan, errChan)
+			go asyncEndpointRunner(endpoint, request.Payload, responseChan, errChan, httpRequest)
 
 			response := <-responseChan
 			err := <-errChan
@@ -58,7 +59,7 @@ func (router *RouteRegistration) HandleRequest(request Request) ([]byte, error) 
 	} else {
 		subRouter, ok := router.SubRouters[parsedPath[0]]
 		if ok {
-			return subRouter.HandleRequest(request)
+			return subRouter.HandleRequest(request, httpRequest)
 		}
 
 	}

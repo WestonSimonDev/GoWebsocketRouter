@@ -1,22 +1,25 @@
 package WebsocketRouter
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"net/http"
+)
 
 type RouteRegistration struct {
 	SubRouters map[string]*RouteRegistration
-	EndPoints  map[string]func(payload []byte) ([]byte, error)
+	EndPoints  map[string]func(payload []byte, httpRequest *http.Request) ([]byte, error)
 }
 
 func (rr *RouteRegistration) CreateSubRouter(pathPrefix string) (*RouteRegistration, error) {
 
-	var newSubRouter = &RouteRegistration{make(map[string]*RouteRegistration), make(map[string]func(payload []byte) ([]byte, error))}
+	var newSubRouter = &RouteRegistration{make(map[string]*RouteRegistration), make(map[string]func(payload []byte, httpRequest *http.Request) ([]byte, error))}
 
 	rr.SubRouters[pathPrefix] = newSubRouter
 
 	return newSubRouter, nil
 }
 
-func (rr *RouteRegistration) CreateEndpoint(path string, endpoint func(payload []byte) ([]byte, error)) {
+func (rr *RouteRegistration) CreateEndpoint(path string, endpoint func(payload []byte, httpRequest *http.Request) ([]byte, error)) {
 	rr.EndPoints[path] = endpoint
 }
 

@@ -5,9 +5,27 @@ import (
 	"net/http"
 )
 
+type Router interface {
+	CreateSubRouter(pathPrefix string) (*RouteRegistration, error)
+	CreateEndpoint(path string, endpoint func(payload []byte, httpRequest *http.Request) ([]byte, error))
+}
+
 type RouteRegistration struct {
 	SubRouters map[string]*RouteRegistration
 	EndPoints  map[string]func(payload []byte, httpRequest *http.Request) ([]byte, error)
+}
+
+type TopLevelRouteRegistration struct {
+	SubRouters map[string]*RouteRegistration
+	EndPoints  map[string]func(payload []byte, httpRequest *http.Request) ([]byte, error)
+}
+
+func (rr *TopLevelRouteRegistration) CreateResponseEndpoint(responseID string, endpoint func(payload []byte, httpRequest *http.Request) ([]byte, error)) {
+	rr.SubRouters["response"].EndPoints[responseID] = endpoint
+}
+
+func (rr *TopLevelRouteRegistration) ConsumeResponseEndpoint(responseID string) {
+	delete(rr.SubRouters["response"].EndPoints, responseID)
 }
 
 func (rr *RouteRegistration) CreateSubRouter(pathPrefix string) (*RouteRegistration, error) {

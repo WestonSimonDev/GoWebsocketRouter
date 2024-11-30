@@ -18,6 +18,8 @@ func CreateToplevelRouter() (*RouteRegistration, error) {
 		return response, nil
 	})
 
+	newRouter.CreateSubRouter("response")
+
 	return newRouter, nil
 
 }
@@ -55,6 +57,22 @@ func (router *RouteRegistration) HandleRequest(request Request, httpRequest *htt
 			}
 			return responseBytes, err
 
+		} else {
+			wildCardEndpoint, wildOk := router.EndPoints["*"]
+			if wildOk {
+				responseChan := make(chan []byte)
+				errChan := make(chan error)
+
+				go asyncEndpointRunner(wildCardEndpoint, request.Payload, responseChan, errChan, httpRequest)
+
+				response := <-responseChan
+				err := <-errChan
+				responseBytes, jsonErr := json.Marshal(Response{Path: fmt.Sprintf("response/%s", request.Response), Payload: response})
+				if jsonErr != nil {
+					return nil, jsonErr
+				}
+				return responseBytes, err
+			}
 		}
 	} else {
 		subRouter, ok := router.SubRouters[parsedPath[0]]

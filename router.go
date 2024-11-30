@@ -9,7 +9,7 @@ import (
 
 func CreateToplevelRouter() (*Router, error) {
 
-	var newRouter = &RouteRegistration{make(map[string]*RouteRegistration), make(map[string]func(payload []byte, httpRequest *http.Request) ([]byte, error))}
+	var newRouter = &TopLevelRouteRegistration{make(map[string]*RouteRegistration), make(map[string]func(payload []byte, httpRequest *http.Request) ([]byte, error))}
 
 	newRouter.CreateEndpoint("heartBeat", func(payload []byte, httpRequest *http.Request) ([]byte, error) {
 		var pathNotFoundResponse = make(map[string]string)

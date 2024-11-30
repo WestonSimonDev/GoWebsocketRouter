@@ -28,6 +28,19 @@ func (rr *TopLevelRouteRegistration) ConsumeResponseEndpoint(responseID string) 
 	delete(rr.SubRouters["response"].EndPoints, responseID)
 }
 
+func (rr *TopLevelRouteRegistration) CreateSubRouter(pathPrefix string) (*RouteRegistration, error) {
+
+	var newSubRouter = &RouteRegistration{make(map[string]*RouteRegistration), make(map[string]func(payload []byte, httpRequest *http.Request) ([]byte, error))}
+
+	rr.SubRouters[pathPrefix] = newSubRouter
+
+	return newSubRouter, nil
+}
+
+func (rr *TopLevelRouteRegistration) CreateEndpoint(path string, endpoint func(payload []byte, httpRequest *http.Request) ([]byte, error)) {
+	rr.EndPoints[path] = endpoint
+}
+
 func (rr *RouteRegistration) CreateSubRouter(pathPrefix string) (*RouteRegistration, error) {
 
 	var newSubRouter = &RouteRegistration{make(map[string]*RouteRegistration), make(map[string]func(payload []byte, httpRequest *http.Request) ([]byte, error))}

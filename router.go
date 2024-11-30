@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func CreateToplevelRouter() (*Router, error) {
+func CreateToplevelRouter() (*TopLevelRouteRegistration, error) {
 
 	var newRouter = &TopLevelRouteRegistration{make(map[string]*RouteRegistration), make(map[string]func(payload []byte, httpRequest *http.Request) ([]byte, error))}
 
